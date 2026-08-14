@@ -32,3 +32,11 @@ Dữ liệu/phim được lấy từ API nguồn. Khả năng phát phụ thuộ
 - `link_m3u8` chỉ dùng làm fallback.
 - Thêm quyền autoplay/fullscreen cho iframe.
 - Có thông báo khi fallback HLS gặp lỗi fatal.
+
+
+## Series / Episode Fix
+- Thêm danh sách tập ngay trong màn hình xem.
+- Tập đang phát được tô đỏ.
+- Chuyển tập không cần quay lại trang chi tiết.
+- Backend fallback từ `/phim/{slug}` sang `/v1/api/phim/{slug}` nếu format đầu không trả tập.
+- Chuẩn hóa cả `episodes -> server_data` và danh sách tập phẳng.

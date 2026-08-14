@@ -14,7 +14,7 @@
 .progress{height:4px;background:#444;margin-top:7px}.progress>div{height:100%;background:var(--red)}.badge{display:inline-block;background:#222;padding:2px 5px;border-radius:4px;font-size:11px;color:#ddd;margin-right:4px}
 .page{display:none;padding:86px 4vw 50px;min-height:100vh}.page.on{display:block}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px}.pager{display:flex;justify-content:center;gap:10px;margin:25px}
 .detailPage{padding-top:64px}.backdrop{height:58vh;position:relative;background:center/cover no-repeat}.backdrop:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#080808 0%,#08080870 45%,transparent 80%),linear-gradient(90deg,#080808b8,transparent)}.detailBox{position:relative;margin:-155px 5vw 0;z-index:2;max-width:900px}.detailBox h1{font-size:42px;margin:0 0 10px}.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chip{background:#222;padding:6px 9px;border-radius:4px;color:#ddd;font-size:13px}.desc{line-height:1.6;color:#ddd}.episodes{padding:25px 5vw 60px}.server{margin:22px 0}.epgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}.epbtn{background:#232323;color:white;border:1px solid #333;border-radius:6px;padding:10px;cursor:pointer}.epbtn:hover{background:#3a3a3a}.epbtn.watched{border-color:#c53030}
-.watch{position:fixed;inset:0;background:#000;z-index:50;display:none}.watch.on{display:block}.watchTop{height:58px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#0b0b0b}.watchTitle{font-weight:800;flex:1}.watch video,.watch iframe{width:100%;height:calc(100vh - 58px);border:0;background:#000}.empty{color:#aaa;padding:20px 0}.smallnote{font-size:12px;color:#888;margin-top:8px}
+.watch{position:fixed;inset:0;background:#000;z-index:50;display:none}.watch.on{display:block}.watchTop{height:58px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#0b0b0b}.watchTitle{font-weight:800;flex:1}.watchBody{height:calc(100vh - 58px);display:grid;grid-template-rows:minmax(0,1fr) auto}.watch video,.watch iframe{width:100%;height:100%;border:0;background:#000}.watchEpisodes{background:#111;border-top:1px solid #292929;padding:10px 14px;max-height:170px;overflow:auto}.watchServer{margin:7px 0}.watchServerName{font-size:12px;color:#aaa;margin:5px 0}.watchEpRow{display:flex;gap:7px;flex-wrap:wrap}.watchEp{border:1px solid #333;background:#242424;color:#fff;border-radius:5px;padding:7px 11px;cursor:pointer}.watchEp.on{background:#e50914;border-color:#e50914}.empty{color:#aaa;padding:20px 0}.smallnote{font-size:12px;color:#888;margin-top:8px}
 @media(max-width:760px){.nav{display:none}.search{width:150px}.top{padding:0 12px;gap:10px}.main{padding-left:12px;padding-right:12px}.rail{grid-auto-columns:42vw}.hero{min-height:62vh;padding-left:16px;padding-right:16px}.page{padding-left:12px;padding-right:12px}.grid{grid-template-columns:repeat(2,1fr)}.detailBox{margin-left:16px;margin-right:16px}.detailBox h1{font-size:32px}.episodes{padding-left:16px;padding-right:16px}}
 </style></head><body>
 
@@ -33,7 +33,10 @@
 
 <section id="detailView" class="page detailPage"><div id="detailContent"></div></section>
 
-<div id="watchView" class="watch"><div class="watchTop"><button class="iconbtn" onclick="closeWatch()">←</button><div id="watchTitle" class="watchTitle"></div><button class="iconbtn" onclick="toggleFavCurrent()">♡</button></div><div id="player"></div></div>
+<div id="watchView" class="watch">
+  <div class="watchTop"><button class="iconbtn" onclick="closeWatch()">←</button><div id="watchTitle" class="watchTitle"></div><button class="iconbtn" onclick="toggleFavCurrent()">♡</button></div>
+  <div class="watchBody"><div id="player"></div><div id="watchEpisodes" class="watchEpisodes"></div></div>
+</div>
 
 <script>
 const $=s=>document.querySelector(s);
@@ -83,6 +86,7 @@ async function openMovie(slug,autoPlay=false){
     let j=await api('/api/movie/'+encodeURIComponent(slug));currentMovie=j.movie||{};currentEpisodes=j.episodes||[];
     let fav=!!state.favorites[slug];let backdrop=currentMovie.thumb_abs||currentMovie.poster_abs||'';
     detailContent.innerHTML=`<div class=backdrop style='background-image:url(${JSON.stringify(backdrop)})'></div><div class=detailBox><h1>${esc(currentMovie.name)}</h1><div class=chips>${[currentMovie.year,currentMovie.quality,currentMovie.lang,currentMovie.episode_current,currentMovie.time].filter(Boolean).map(x=>`<span class=chip>${esc(x)}</span>`).join('')}</div><p class=desc>${esc(strip(currentMovie.content||''))}</p><button class="btn play" onclick="playFirst()">▶ Xem phim</button><button id=favBtn class="btn more fav ${fav?'active':''}" onclick="toggleFavorite()">${fav?'♥ Đã lưu':'♡ Yêu thích'}</button><div class=smallnote>${esc(currentMovie.origin_name||'')}</div></div><div class=episodes>${currentEpisodes.map((sv,i)=>`<div class=server><h2>${esc(sv.server_name||('Server '+(i+1)))}</h2><div class=epgrid>${(sv.server_data||[]).map((ep,ei)=>{let wk=slug+'|'+i+'|'+ei,p=state.progress[wk];return `<button class="epbtn ${p&&p.time>30?'watched':''}" onclick="playEpisode(${i},${ei})">${esc(ep.name||('Tập '+(ei+1)))}</button>`}).join('')}</div></div>`).join('')||'<p class=empty>Chưa có tập phim.</p>'}`;
+    renderWatchEpisodes();
     if(autoPlay) setTimeout(playFirst,150);
   }catch(e){detailContent.innerHTML=`<p class=empty>${esc(e.message)}</p>`}
 }
@@ -95,8 +99,15 @@ function playFirst(){
   if(found){let [s,si,ei]=found[0].split('|');return playEpisode(Number(si),Number(ei))}
   playEpisode(0,0)
 }
+function renderWatchEpisodes(activeSi=-1,activeEi=-1){
+  const box=document.querySelector('#watchEpisodes');
+  if(!box)return;
+  if(!currentEpisodes.length){box.innerHTML='<div class=empty>Phim này chưa có danh sách tập.</div>';return}
+  box.innerHTML=currentEpisodes.map((sv,si)=>`<div class=watchServer><div class=watchServerName>${esc(sv.server_name||('Server '+(si+1)))}</div><div class=watchEpRow>${(sv.server_data||[]).map((ep,ei)=>`<button class="watchEp ${si===activeSi&&ei===activeEi?'on':''}" onclick="playEpisode(${si},${ei})">${esc(ep.name||('Tập '+(ei+1)))}</button>`).join('')}</div></div>`).join('');
+}
 function playEpisode(si,ei){
   let ep=currentEpisodes?.[si]?.server_data?.[ei];if(!ep)return;
+  renderWatchEpisodes(si,ei);
   closePlayerOnly();watchView.classList.add('on');watchTitle.textContent=`${currentMovie.name} · ${ep.name||'Tập'}`;currentWatchKey=currentMovie.slug+'|'+si+'|'+ei;
   state.history[currentMovie.slug]={movie:currentMovie,updated:Date.now()};saveState();
   let m3u8=ep.link_m3u8||'',embed=ep.link_embed||'';
