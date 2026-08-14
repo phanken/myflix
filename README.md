@@ -54,3 +54,11 @@ Dữ liệu/phim được lấy từ API nguồn. Khả năng phát phụ thuộ
 - Desktop luôn giữ player bên trái và danh sách tập 360px bên phải.
 - Chỉ chuyển danh sách tập xuống dưới khi viewport <= 600px.
 - Desktop có min-width 1000px để player không bị ép biến mất.
+
+
+## V3 Cinema + Genres
+- Thêm `Phim chiếu rạp` lên menu và trang chủ.
+- Trang chủ có hàng ngang `🍿 Phim chiếu rạp`.
+- Thêm menu `Thể loại` dạng dropdown.
+- Danh sách thể loại tải động từ `/the-loai`.
+- Chọn thể loại mở danh sách phim qua `/v1/api/the-loai/{slug}`.

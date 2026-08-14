@@ -39,6 +39,21 @@ app.get('/api/list/:slug',async(req,res)=>{
     res.json({ok:true,...normList(await jfetch(`${API}/v1/api/danh-sach/${encodeURIComponent(req.params.slug)}?${q}`))})
   }catch(e){res.status(500).json({ok:false,error:e.message})}
 });
+
+app.get('/api/genres',async(req,res)=>{
+  try{
+    const d=await jfetch(`${API}/the-loai`);
+    const items=d?.data?.items||d?.items||[];
+    res.json({ok:true,items});
+  }catch(e){res.status(500).json({ok:false,error:e.message})}
+});
+
+app.get('/api/genre/:slug',async(req,res)=>{
+  try{
+    const q=new URLSearchParams(req.query);
+    res.json({ok:true,...normList(await jfetch(`${API}/v1/api/the-loai/${encodeURIComponent(req.params.slug)}?${q}`))})
+  }catch(e){res.status(500).json({ok:false,error:e.message})}
+});
 app.get('/api/search',async(req,res)=>{
   try{
     const kw=String(req.query.q||'').trim();

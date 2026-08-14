@@ -4,7 +4,10 @@
 :root{--red:#e50914;--bg:#080808;--card:#171717;--muted:#a8a8a8}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:#fff;font-family:Arial,sans-serif}
 .top{position:fixed;inset:0 0 auto 0;height:64px;z-index:30;padding:0 4vw;display:flex;align-items:center;gap:22px;background:linear-gradient(#090909f5,#090909bf,#09090900)}
-.brand{font-weight:900;font-size:27px;color:var(--red);cursor:pointer}.nav{display:flex;gap:15px}.nav a{color:#ddd;text-decoration:none;font-size:14px;cursor:pointer}.nav a:hover{color:#fff}
+.brand{font-weight:900;font-size:27px;color:var(--red);cursor:pointer}.nav{display:flex;gap:15px;align-items:center}.nav a{color:#ddd;text-decoration:none;font-size:14px;cursor:pointer}.nav a:hover{color:#fff}
+.genreMenu{position:relative}.genreToggle{color:#ddd;font-size:14px;cursor:pointer;user-select:none}.genreToggle:hover{color:#fff}
+.genreDropdown{position:absolute;top:27px;left:-12px;width:520px;max-height:430px;overflow:auto;background:#111;border:1px solid #303030;border-radius:10px;padding:12px;display:none;grid-template-columns:repeat(3,1fr);gap:5px;box-shadow:0 16px 40px #000a}
+.genreMenu.open .genreDropdown{display:grid}.genreItem{padding:9px 10px;border-radius:6px;color:#ddd;font-size:13px;cursor:pointer}.genreItem:hover{background:#292929;color:#fff}
 .searchWrap{margin-left:auto;display:flex;align-items:center;gap:8px}.search{width:260px;background:#111c;border:1px solid #666;color:white;padding:9px 11px;border-radius:5px}.iconbtn{border:0;background:#252525;color:#fff;padding:9px 11px;border-radius:6px;cursor:pointer}
 .hero{min-height:72vh;position:relative;display:flex;align-items:flex-end;padding:120px 5vw 62px;background:#111 center/cover no-repeat}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#080808f5 0%,#080808aa 35%,#08080820 70%),linear-gradient(0deg,#080808 0%,transparent 42%)}
 .heroContent{position:relative;z-index:2;width:min(650px,92vw)}.hero h1{font-size:clamp(34px,6vw,64px);margin:0 0 12px;line-height:1}.heroMeta{color:#ddd;margin:8px 0}.heroDesc{color:#ddd;line-height:1.55;max-width:620px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
@@ -36,7 +39,17 @@
 
 <header class="top">
   <div class="brand" onclick="goHome()">MYFLIX</div>
-  <nav class="nav"><a onclick="goHome()">Trang chủ</a><a onclick="browse('phim-le','Phim lẻ')">Phim lẻ</a><a onclick="browse('phim-bo','Phim bộ')">Phim bộ</a><a onclick="showFavorites()">Yêu thích</a></nav>
+  <nav class="nav">
+    <a onclick="goHome()">Trang chủ</a>
+    <a onclick="browse('phim-chieu-rap','Phim chiếu rạp')">Phim chiếu rạp</a>
+    <a onclick="browse('phim-le','Phim lẻ')">Phim lẻ</a>
+    <a onclick="browse('phim-bo','Phim bộ')">Phim bộ</a>
+    <div id="genreMenu" class="genreMenu">
+      <span class="genreToggle" onclick="toggleGenres(event)">Thể loại ▾</span>
+      <div id="genreDropdown" class="genreDropdown"></div>
+    </div>
+    <a onclick="showFavorites()">Yêu thích</a>
+  </nav>
   <div class="searchWrap"><input id="q" class="search" placeholder="Tìm phim..."><button class="iconbtn" onclick="doSearch()">⌕</button></div>
 </header>
 
@@ -82,7 +95,7 @@
 
 <script>
 const $=s=>document.querySelector(s);
-let homeItems=[],currentMovie=null,currentEpisodes=[],browseMode='list',browseSlug='',browsePage=1,browseQuery='',hls=null,currentWatchKey='',saveTimer=null;
+let homeItems=[],currentMovie=null,currentEpisodes=[],browseMode='list',browseSlug='',browsePage=1,browseQuery='',hls=null,currentWatchKey='',saveTimer=null,genresLoaded=false;
 let state=JSON.parse(localStorage.myflixState||'{"favorites":{},"progress":{},"history":{}}');
 function saveState(){localStorage.myflixState=JSON.stringify(state)}
 function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
@@ -98,13 +111,24 @@ function card(x){
 function rail(title,items){if(!items.length)return'';return `<section class=section><h2>${esc(title)}</h2><div class=rail>${items.map(card).join('')}</div></section>`}
 async function initHome(){
   try{
-    const [a,b,c]=await Promise.all([api('/api/home?page=1'),api('/api/list/phim-le?page=1'),api('/api/list/phim-bo?page=1')]);
+    const [a,cinema,b,c]=await Promise.all([
+      api('/api/home?page=1'),
+      api('/api/list/phim-chieu-rap?page=1'),
+      api('/api/list/phim-le?page=1'),
+      api('/api/list/phim-bo?page=1')
+    ]);
     homeItems=a.items||[];
-    const featured=homeItems[0]||b.items?.[0]||c.items?.[0];
+    const featured=(cinema.items||[])[0]||homeItems[0]||b.items?.[0]||c.items?.[0];
     if(featured) setHero(featured);
     let favs=Object.values(state.favorites||{});
     let continueItems=Object.values(state.progress||{}).filter(x=>x.duration&&x.time>30&&x.time<x.duration-45).sort((x,y)=>y.updated-x.updated).map(p=>p.movie).filter(Boolean);
-    homeMain.innerHTML=rail('▶ Tiếp tục xem',uniqueBySlug(continueItems).slice(0,20))+rail('🔥 Mới cập nhật',homeItems.slice(0,24))+rail('🎬 Phim lẻ',b.items||[])+rail('📺 Phim bộ',c.items||[])+rail('❤ Danh sách của tôi',favs);
+    homeMain.innerHTML=
+      rail('▶ Tiếp tục xem',uniqueBySlug(continueItems).slice(0,20))+
+      rail('🔥 Mới cập nhật',homeItems.slice(0,24))+
+      rail('🍿 Phim chiếu rạp',cinema.items||[])+
+      rail('🎬 Phim lẻ',b.items||[])+
+      rail('📺 Phim bộ',c.items||[])+
+      rail('❤ Danh sách của tôi',favs);
   }catch(e){homeMain.innerHTML=`<p class=empty>${esc(e.message)}</p>`}
 }
 function uniqueBySlug(a){let s=new Set();return a.filter(x=>x?.slug&&!s.has(x.slug)&&s.add(x.slug))}
@@ -117,9 +141,21 @@ async function setHero(x){
 }
 function hideAll(){homeView.style.display='none';browseView.classList.remove('on');detailView.classList.remove('on')}
 function goHome(){closeWatch();hideAll();homeView.style.display='block';window.scrollTo(0,0);initHome()}
-async function browse(slug,title){hideAll();browseView.classList.add('on');browseMode='list';browseSlug=slug;browseQuery='';browsePage=1;browseTitle.textContent=title;loadBrowse()}
+async function browse(slug,title){closeGenres();hideAll();browseView.classList.add('on');browseMode='list';browseSlug=slug;browseQuery='';browsePage=1;browseTitle.textContent=title;loadBrowse()}
+async function browseGenre(slug,title){closeGenres();hideAll();browseView.classList.add('on');browseMode='genre';browseSlug=slug;browseQuery='';browsePage=1;browseTitle.textContent=title;loadBrowse()}
 async function doSearch(){let k=q.value.trim();if(k.length<2)return;hideAll();browseView.classList.add('on');browseMode='search';browseQuery=k; browsePage=1;browseTitle.textContent='Kết quả: '+k;loadBrowse()}
-async function loadBrowse(){browseGrid.innerHTML='<p class=empty>Đang tải...</p>';try{let j=browseMode==='search'?await api(`/api/search?q=${encodeURIComponent(browseQuery)}&page=${browsePage}`):await api(`/api/list/${browseSlug}?page=${browsePage}`);browseGrid.innerHTML=(j.items||[]).map(card).join('')||'<p class=empty>Không có phim.</p>';let p=j.pagination||{};pageLabel.textContent=`Trang ${p.currentPage||browsePage}${p.totalPages?' / '+p.totalPages:''}`}catch(e){browseGrid.innerHTML=`<p class=empty>${esc(e.message)}</p>`}}
+async function loadBrowse(){
+  browseGrid.innerHTML='<p class=empty>Đang tải...</p>';
+  try{
+    let j;
+    if(browseMode==='search') j=await api(`/api/search?q=${encodeURIComponent(browseQuery)}&page=${browsePage}`);
+    else if(browseMode==='genre') j=await api(`/api/genre/${encodeURIComponent(browseSlug)}?page=${browsePage}`);
+    else j=await api(`/api/list/${encodeURIComponent(browseSlug)}?page=${browsePage}`);
+    browseGrid.innerHTML=(j.items||[]).map(card).join('')||'<p class=empty>Không có phim.</p>';
+    let p=j.pagination||{};
+    pageLabel.textContent=`Trang ${p.currentPage||browsePage}${p.totalPages?' / '+p.totalPages:''}`;
+  }catch(e){browseGrid.innerHTML=`<p class=empty>${esc(e.message)}</p>`}
+}
 function nextPage(){browsePage++;loadBrowse();window.scrollTo(0,0)}function prevPage(){if(browsePage>1){browsePage--;loadBrowse();window.scrollTo(0,0)}}
 async function showFavorites(){hideAll();browseView.classList.add('on');browseTitle.textContent='❤ Danh sách của tôi';browseGrid.innerHTML=Object.values(state.favorites||{}).map(card).join('')||'<p class=empty>Chưa có phim yêu thích.</p>';pageLabel.textContent=''}
 async function openMovie(slug,autoPlay=false){
@@ -195,6 +231,25 @@ function playEpisode(si,ei){
 }
 function closePlayerOnly(){if(hls){hls.destroy();hls=null}player.innerHTML=''}
 function closeWatch(){closePlayerOnly();watchView.classList.remove('on');if(currentMovie?.slug)openMovie(currentMovie.slug)}
+
+async function loadGenres(){
+  if(genresLoaded)return;
+  try{
+    const j=await api('/api/genres');
+    genreDropdown.innerHTML=(j.items||[]).map(x=>`<div class="genreItem" onclick='browseGenre(${JSON.stringify(x.slug)},${JSON.stringify(x.name)})'>${esc(x.name)}</div>`).join('');
+    genresLoaded=true;
+  }catch(e){
+    genreDropdown.innerHTML=`<div class="genreItem">${esc(e.message)}</div>`;
+  }
+}
+function toggleGenres(e){
+  e.stopPropagation();
+  genreMenu.classList.toggle('open');
+  if(genreMenu.classList.contains('open')) loadGenres();
+}
+function closeGenres(){genreMenu?.classList.remove('open')}
+document.addEventListener('click',e=>{if(!genreMenu?.contains(e.target))closeGenres()});
+
 q.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
 window.addEventListener('popstate',()=>goHome());
 homeView.style.display='block';initHome();
