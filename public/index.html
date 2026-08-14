@@ -1,0 +1,118 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MyFlix V3</title><script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+<style>
+:root{--red:#e50914;--bg:#080808;--card:#171717;--muted:#a8a8a8}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:#fff;font-family:Arial,sans-serif}
+.top{position:fixed;inset:0 0 auto 0;height:64px;z-index:30;padding:0 4vw;display:flex;align-items:center;gap:22px;background:linear-gradient(#090909f5,#090909bf,#09090900)}
+.brand{font-weight:900;font-size:27px;color:var(--red);cursor:pointer}.nav{display:flex;gap:15px}.nav a{color:#ddd;text-decoration:none;font-size:14px;cursor:pointer}.nav a:hover{color:#fff}
+.searchWrap{margin-left:auto;display:flex;align-items:center;gap:8px}.search{width:260px;background:#111c;border:1px solid #666;color:white;padding:9px 11px;border-radius:5px}.iconbtn{border:0;background:#252525;color:#fff;padding:9px 11px;border-radius:6px;cursor:pointer}
+.hero{min-height:72vh;position:relative;display:flex;align-items:flex-end;padding:120px 5vw 62px;background:#111 center/cover no-repeat}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#080808f5 0%,#080808aa 35%,#08080820 70%),linear-gradient(0deg,#080808 0%,transparent 42%)}
+.heroContent{position:relative;z-index:2;width:min(650px,92vw)}.hero h1{font-size:clamp(34px,6vw,64px);margin:0 0 12px;line-height:1}.heroMeta{color:#ddd;margin:8px 0}.heroDesc{color:#ddd;line-height:1.55;max-width:620px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.btn{border:0;border-radius:6px;padding:11px 18px;font-weight:800;cursor:pointer;margin-right:8px}.play{background:#fff;color:#000}.more{background:#666a;color:#fff}.fav.active{background:var(--red)}
+.main{position:relative;z-index:4;margin-top:-20px;padding:0 4vw 55px}.section{margin:20px 0 30px}.section h2{font-size:22px;margin:0 0 12px}.rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(165px,17vw);gap:10px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.rail::-webkit-scrollbar{display:none}
+.card{background:var(--card);border-radius:7px;overflow:hidden;cursor:pointer;transition:.18s transform}.card:hover{transform:scale(1.045);z-index:3}.poster{aspect-ratio:2/3;background:#202020}.poster img{width:100%;height:100%;object-fit:cover;display:block}.info{padding:8px}.title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{font-size:12px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress{height:4px;background:#444;margin-top:7px}.progress>div{height:100%;background:var(--red)}.badge{display:inline-block;background:#222;padding:2px 5px;border-radius:4px;font-size:11px;color:#ddd;margin-right:4px}
+.page{display:none;padding:86px 4vw 50px;min-height:100vh}.page.on{display:block}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px}.pager{display:flex;justify-content:center;gap:10px;margin:25px}
+.detailPage{padding-top:64px}.backdrop{height:58vh;position:relative;background:center/cover no-repeat}.backdrop:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#080808 0%,#08080870 45%,transparent 80%),linear-gradient(90deg,#080808b8,transparent)}.detailBox{position:relative;margin:-155px 5vw 0;z-index:2;max-width:900px}.detailBox h1{font-size:42px;margin:0 0 10px}.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chip{background:#222;padding:6px 9px;border-radius:4px;color:#ddd;font-size:13px}.desc{line-height:1.6;color:#ddd}.episodes{padding:25px 5vw 60px}.server{margin:22px 0}.epgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}.epbtn{background:#232323;color:white;border:1px solid #333;border-radius:6px;padding:10px;cursor:pointer}.epbtn:hover{background:#3a3a3a}.epbtn.watched{border-color:#c53030}
+.watch{position:fixed;inset:0;background:#000;z-index:50;display:none}.watch.on{display:block}.watchTop{height:58px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#0b0b0b}.watchTitle{font-weight:800;flex:1}.watch video,.watch iframe{width:100%;height:calc(100vh - 58px);border:0;background:#000}.empty{color:#aaa;padding:20px 0}.smallnote{font-size:12px;color:#888;margin-top:8px}
+@media(max-width:760px){.nav{display:none}.search{width:150px}.top{padding:0 12px;gap:10px}.main{padding-left:12px;padding-right:12px}.rail{grid-auto-columns:42vw}.hero{min-height:62vh;padding-left:16px;padding-right:16px}.page{padding-left:12px;padding-right:12px}.grid{grid-template-columns:repeat(2,1fr)}.detailBox{margin-left:16px;margin-right:16px}.detailBox h1{font-size:32px}.episodes{padding-left:16px;padding-right:16px}}
+</style></head><body>
+
+<header class="top">
+  <div class="brand" onclick="goHome()">MYFLIX</div>
+  <nav class="nav"><a onclick="goHome()">Trang chủ</a><a onclick="browse('phim-le','Phim lẻ')">Phim lẻ</a><a onclick="browse('phim-bo','Phim bộ')">Phim bộ</a><a onclick="showFavorites()">Yêu thích</a></nav>
+  <div class="searchWrap"><input id="q" class="search" placeholder="Tìm phim..."><button class="iconbtn" onclick="doSearch()">⌕</button></div>
+</header>
+
+<section id="homeView">
+  <div id="hero" class="hero"><div class="heroContent"><h1 id="heroTitle">MyFlix</h1><div id="heroMeta" class="heroMeta">Đang tải phim...</div><p id="heroDesc" class="heroDesc"></p><div><button id="heroPlay" class="btn play">▶ Xem ngay</button><button id="heroMore" class="btn more">ⓘ Chi tiết</button></div></div></div>
+  <main id="homeMain" class="main"></main>
+</section>
+
+<section id="browseView" class="page"><h1 id="browseTitle"></h1><div id="browseGrid" class="grid"></div><div class="pager"><button class="btn more" onclick="prevPage()">← Trước</button><span id="pageLabel"></span><button class="btn more" onclick="nextPage()">Sau →</button></div></section>
+
+<section id="detailView" class="page detailPage"><div id="detailContent"></div></section>
+
+<div id="watchView" class="watch"><div class="watchTop"><button class="iconbtn" onclick="closeWatch()">←</button><div id="watchTitle" class="watchTitle"></div><button class="iconbtn" onclick="toggleFavCurrent()">♡</button></div><div id="player"></div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+let homeItems=[],currentMovie=null,currentEpisodes=[],browseMode='list',browseSlug='',browsePage=1,browseQuery='',hls=null,currentWatchKey='',saveTimer=null;
+let state=JSON.parse(localStorage.myflixState||'{"favorites":{},"progress":{},"history":{}}');
+function saveState(){localStorage.myflixState=JSON.stringify(state)}
+function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function strip(s){let d=document.createElement('div');d.innerHTML=s||'';return d.textContent||''}
+async function api(u){let r=await fetch(u),j=await r.json();if(!r.ok||j.ok===false)throw Error(j.error||'Lỗi');return j}
+function image(x){return x.poster_abs||x.thumb_abs||x.poster_url||x.thumb_url||''}
+function fkey(x){return x.slug||x._id||x.name}
+function progressFor(slug){let all=Object.values(state.progress).filter(x=>x.slug===slug).sort((a,b)=>(b.updated||0)-(a.updated||0));return all[0]||null}
+function card(x){
+ const pr=progressFor(x.slug),pc=pr&&pr.duration?Math.min(100,pr.time/pr.duration*100):0;
+ return `<div class=card onclick='openMovie(${JSON.stringify(x.slug)})'><div class=poster>${image(x)?`<img src="${image(x)}" loading=lazy>`:''}</div><div class=info><div class=title>${esc(x.name)}</div><div class=meta>${esc(x.origin_name||'')} ${x.year?'· '+x.year:''}</div>${pc>1?`<div class=progress><div style="width:${pc}%"></div></div>`:''}</div></div>`
+}
+function rail(title,items){if(!items.length)return'';return `<section class=section><h2>${esc(title)}</h2><div class=rail>${items.map(card).join('')}</div></section>`}
+async function initHome(){
+  try{
+    const [a,b,c]=await Promise.all([api('/api/home?page=1'),api('/api/list/phim-le?page=1'),api('/api/list/phim-bo?page=1')]);
+    homeItems=a.items||[];
+    const featured=homeItems[0]||b.items?.[0]||c.items?.[0];
+    if(featured) setHero(featured);
+    let favs=Object.values(state.favorites||{});
+    let continueItems=Object.values(state.progress||{}).filter(x=>x.duration&&x.time>30&&x.time<x.duration-45).sort((x,y)=>y.updated-x.updated).map(p=>p.movie).filter(Boolean);
+    homeMain.innerHTML=rail('▶ Tiếp tục xem',uniqueBySlug(continueItems).slice(0,20))+rail('🔥 Mới cập nhật',homeItems.slice(0,24))+rail('🎬 Phim lẻ',b.items||[])+rail('📺 Phim bộ',c.items||[])+rail('❤ Danh sách của tôi',favs);
+  }catch(e){homeMain.innerHTML=`<p class=empty>${esc(e.message)}</p>`}
+}
+function uniqueBySlug(a){let s=new Set();return a.filter(x=>x?.slug&&!s.has(x.slug)&&s.add(x.slug))}
+async function setHero(x){
+  let m=x;try{let d=await api('/api/movie/'+encodeURIComponent(x.slug));m={...x,...d.movie}}catch{}
+  hero.style.backgroundImage=`url("${m.thumb_abs||m.poster_abs||image(m)}")`;
+  heroTitle.textContent=m.name||'MyFlix';heroMeta.textContent=[m.year,m.quality,m.lang,m.episode_current].filter(Boolean).join(' · ');
+  heroDesc.textContent=strip(m.content||m.origin_name||'');
+  heroMore.onclick=()=>openMovie(m.slug);heroPlay.onclick=()=>openMovie(m.slug,true);
+}
+function hideAll(){homeView.style.display='none';browseView.classList.remove('on');detailView.classList.remove('on')}
+function goHome(){closeWatch();hideAll();homeView.style.display='block';window.scrollTo(0,0);initHome()}
+async function browse(slug,title){hideAll();browseView.classList.add('on');browseMode='list';browseSlug=slug;browseQuery='';browsePage=1;browseTitle.textContent=title;loadBrowse()}
+async function doSearch(){let k=q.value.trim();if(k.length<2)return;hideAll();browseView.classList.add('on');browseMode='search';browseQuery=k; browsePage=1;browseTitle.textContent='Kết quả: '+k;loadBrowse()}
+async function loadBrowse(){browseGrid.innerHTML='<p class=empty>Đang tải...</p>';try{let j=browseMode==='search'?await api(`/api/search?q=${encodeURIComponent(browseQuery)}&page=${browsePage}`):await api(`/api/list/${browseSlug}?page=${browsePage}`);browseGrid.innerHTML=(j.items||[]).map(card).join('')||'<p class=empty>Không có phim.</p>';let p=j.pagination||{};pageLabel.textContent=`Trang ${p.currentPage||browsePage}${p.totalPages?' / '+p.totalPages:''}`}catch(e){browseGrid.innerHTML=`<p class=empty>${esc(e.message)}</p>`}}
+function nextPage(){browsePage++;loadBrowse();window.scrollTo(0,0)}function prevPage(){if(browsePage>1){browsePage--;loadBrowse();window.scrollTo(0,0)}}
+async function showFavorites(){hideAll();browseView.classList.add('on');browseTitle.textContent='❤ Danh sách của tôi';browseGrid.innerHTML=Object.values(state.favorites||{}).map(card).join('')||'<p class=empty>Chưa có phim yêu thích.</p>';pageLabel.textContent=''}
+async function openMovie(slug,autoPlay=false){
+  hideAll();detailView.classList.add('on');detailContent.innerHTML='<p class=empty>Đang tải...</p>';window.scrollTo(0,0);
+  try{
+    let j=await api('/api/movie/'+encodeURIComponent(slug));currentMovie=j.movie||{};currentEpisodes=j.episodes||[];
+    let fav=!!state.favorites[slug];let backdrop=currentMovie.thumb_abs||currentMovie.poster_abs||'';
+    detailContent.innerHTML=`<div class=backdrop style='background-image:url(${JSON.stringify(backdrop)})'></div><div class=detailBox><h1>${esc(currentMovie.name)}</h1><div class=chips>${[currentMovie.year,currentMovie.quality,currentMovie.lang,currentMovie.episode_current,currentMovie.time].filter(Boolean).map(x=>`<span class=chip>${esc(x)}</span>`).join('')}</div><p class=desc>${esc(strip(currentMovie.content||''))}</p><button class="btn play" onclick="playFirst()">▶ Xem phim</button><button id=favBtn class="btn more fav ${fav?'active':''}" onclick="toggleFavorite()">${fav?'♥ Đã lưu':'♡ Yêu thích'}</button><div class=smallnote>${esc(currentMovie.origin_name||'')}</div></div><div class=episodes>${currentEpisodes.map((sv,i)=>`<div class=server><h2>${esc(sv.server_name||('Server '+(i+1)))}</h2><div class=epgrid>${(sv.server_data||[]).map((ep,ei)=>{let wk=slug+'|'+i+'|'+ei,p=state.progress[wk];return `<button class="epbtn ${p&&p.time>30?'watched':''}" onclick="playEpisode(${i},${ei})">${esc(ep.name||('Tập '+(ei+1)))}</button>`}).join('')}</div></div>`).join('')||'<p class=empty>Chưa có tập phim.</p>'}`;
+    if(autoPlay) setTimeout(playFirst,150);
+  }catch(e){detailContent.innerHTML=`<p class=empty>${esc(e.message)}</p>`}
+}
+function toggleFavorite(){let s=currentMovie.slug;if(!s)return;if(state.favorites[s])delete state.favorites[s];else state.favorites[s]=currentMovie;saveState();let b=$('#favBtn');if(b){b.classList.toggle('active',!!state.favorites[s]);b.textContent=state.favorites[s]?'♥ Đã lưu':'♡ Yêu thích'}}
+function toggleFavCurrent(){toggleFavorite()}
+function playFirst(){
+  if(!currentEpisodes.length)return;
+  // resume latest episode for movie if possible
+  let found=Object.entries(state.progress).filter(([k,v])=>v.slug===currentMovie.slug&&v.time>30&&v.duration-v.time>45).sort((a,b)=>b[1].updated-a[1].updated)[0];
+  if(found){let [s,si,ei]=found[0].split('|');return playEpisode(Number(si),Number(ei))}
+  playEpisode(0,0)
+}
+function playEpisode(si,ei){
+  let ep=currentEpisodes?.[si]?.server_data?.[ei];if(!ep)return;
+  closePlayerOnly();watchView.classList.add('on');watchTitle.textContent=`${currentMovie.name} · ${ep.name||'Tập'}`;currentWatchKey=currentMovie.slug+'|'+si+'|'+ei;
+  state.history[currentMovie.slug]={movie:currentMovie,updated:Date.now()};saveState();
+  let m3u8=ep.link_m3u8||'',embed=ep.link_embed||'';
+  if(m3u8){
+    let v=document.createElement('video');v.controls=true;v.autoplay=true;v.playsInline=true;player.appendChild(v);
+    v.addEventListener('loadedmetadata',()=>{let p=state.progress[currentWatchKey];if(p&&p.time<v.duration-15)v.currentTime=p.time});
+    v.addEventListener('timeupdate',()=>{clearTimeout(saveTimer);saveTimer=setTimeout(()=>{state.progress[currentWatchKey]={slug:currentMovie.slug,movie:currentMovie,episode:ep.name||'',time:v.currentTime||0,duration:v.duration||0,updated:Date.now()};saveState()},600)});
+    if(v.canPlayType('application/vnd.apple.mpegurl')){v.src=m3u8}
+    else if(Hls.isSupported()){hls=new Hls();hls.loadSource(m3u8);hls.attachMedia(v)}
+    else if(embed){player.innerHTML=`<iframe allowfullscreen src="${embed}"></iframe>`}
+  } else if(embed){player.innerHTML=`<iframe allowfullscreen src="${embed}"></iframe>`}
+  else player.innerHTML='<p class=empty>Không có nguồn phát.</p>'
+}
+function closePlayerOnly(){if(hls){hls.destroy();hls=null}player.innerHTML=''}
+function closeWatch(){closePlayerOnly();watchView.classList.remove('on');if(currentMovie?.slug)openMovie(currentMovie.slug)}
+q.addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
+window.addEventListener('popstate',()=>goHome());
+homeView.style.display='block';initHome();
+</script></body></html>
