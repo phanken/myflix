@@ -48,3 +48,9 @@ Dữ liệu/phim được lấy từ API nguồn. Khả năng phát phụ thuộ
 - Tập đang phát tô đỏ.
 - Có nút Tập trước / Tập tiếp dưới player.
 - Trên điện thoại sidebar tự chuyển xuống dưới player.
+
+
+## PC layout fix
+- Desktop luôn giữ player bên trái và danh sách tập 360px bên phải.
+- Chỉ chuyển danh sách tập xuống dưới khi viewport <= 600px.
+- Desktop có min-width 1000px để player không bị ép biến mất.
