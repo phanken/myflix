@@ -14,8 +14,14 @@
 .progress{height:4px;background:#444;margin-top:7px}.progress>div{height:100%;background:var(--red)}.badge{display:inline-block;background:#222;padding:2px 5px;border-radius:4px;font-size:11px;color:#ddd;margin-right:4px}
 .page{display:none;padding:86px 4vw 50px;min-height:100vh}.page.on{display:block}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px}.pager{display:flex;justify-content:center;gap:10px;margin:25px}
 .detailPage{padding-top:64px}.backdrop{height:58vh;position:relative;background:center/cover no-repeat}.backdrop:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#080808 0%,#08080870 45%,transparent 80%),linear-gradient(90deg,#080808b8,transparent)}.detailBox{position:relative;margin:-155px 5vw 0;z-index:2;max-width:900px}.detailBox h1{font-size:42px;margin:0 0 10px}.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chip{background:#222;padding:6px 9px;border-radius:4px;color:#ddd;font-size:13px}.desc{line-height:1.6;color:#ddd}.episodes{padding:25px 5vw 60px}.server{margin:22px 0}.epgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}.epbtn{background:#232323;color:white;border:1px solid #333;border-radius:6px;padding:10px;cursor:pointer}.epbtn:hover{background:#3a3a3a}.epbtn.watched{border-color:#c53030}
-.watch{position:fixed;inset:0;background:#000;z-index:50;display:none}.watch.on{display:block}.watchTop{height:58px;display:flex;align-items:center;gap:12px;padding:0 14px;background:#0b0b0b}.watchTitle{font-weight:800;flex:1}.watchBody{height:calc(100vh - 58px);display:grid;grid-template-rows:minmax(0,1fr) auto}.watch video,.watch iframe{width:100%;height:100%;border:0;background:#000}.watchEpisodes{background:#111;border-top:1px solid #292929;padding:10px 14px;max-height:170px;overflow:auto}.watchServer{margin:7px 0}.watchServerName{font-size:12px;color:#aaa;margin:5px 0}.watchEpRow{display:flex;gap:7px;flex-wrap:wrap}.watchEp{border:1px solid #333;background:#242424;color:#fff;border-radius:5px;padding:7px 11px;cursor:pointer}.watchEp.on{background:#e50914;border-color:#e50914}.empty{color:#aaa;padding:20px 0}.smallnote{font-size:12px;color:#888;margin-top:8px}
-@media(max-width:760px){.nav{display:none}.search{width:150px}.top{padding:0 12px;gap:10px}.main{padding-left:12px;padding-right:12px}.rail{grid-auto-columns:42vw}.hero{min-height:62vh;padding-left:16px;padding-right:16px}.page{padding-left:12px;padding-right:12px}.grid{grid-template-columns:repeat(2,1fr)}.detailBox{margin-left:16px;margin-right:16px}.detailBox h1{font-size:32px}.episodes{padding-left:16px;padding-right:16px}}
+.watch{position:fixed;inset:0;background:#07090d;z-index:50;display:none;overflow:auto}.watch.on{display:block}
+.watchTop{height:62px;display:flex;align-items:center;gap:12px;padding:0 18px;background:#080b10;border-bottom:1px solid #202631;position:sticky;top:0;z-index:5}.watchTitle{font-weight:800;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.watchShell{min-height:calc(100vh - 62px);display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:0;background:#080b10}
+.watchMain{min-width:0;background:#05070a;display:flex;flex-direction:column}.playerStage{position:relative;min-height:0;aspect-ratio:16/9;background:#000}.playerStage #player{position:absolute;inset:0}.watch video,.watch iframe{width:100%;height:100%;border:0;background:#000;display:block}
+.watchFooter{padding:14px 18px 20px;background:#090c11;border-top:1px solid #1b222d}.nowPlaying{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.nowPlaying h2{font-size:20px;margin:0;flex:1}.watchNav{display:flex;gap:8px}.watchNav button{border:1px solid #2a3340;background:#121821;color:#fff;border-radius:7px;padding:9px 13px;cursor:pointer}.watchNav button:hover{background:#202936}
+.watchSide{background:#10141b;border-left:1px solid #272d36;min-height:calc(100vh - 62px);display:flex;flex-direction:column}.sideHead{padding:17px 16px 13px;border-bottom:1px solid #252b34}.sideMovie{font-size:19px;font-weight:800}.sideOrigin{color:#8d98a8;font-size:13px;margin-top:4px}.serverPill{display:inline-block;margin-top:12px;border:1px solid #159b60;color:#2bd481;padding:6px 10px;border-radius:7px;font-size:12px}.epSearch{padding:12px 14px;border-bottom:1px solid #252b34}.epSearch input{width:100%;background:#151a22;border:1px solid #2a313c;color:#fff;border-radius:9px;padding:10px 11px;outline:none}.watchEpisodes{padding:12px 14px 20px;overflow:auto;flex:1}.watchServer{margin:0 0 14px}.watchServerName{font-size:12px;color:#8b97a7;margin:0 0 8px}.watchEpRow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.watchEp{height:43px;border:1px solid #2a313d;background:#141922;color:#fff;border-radius:8px;padding:0 4px;cursor:pointer;font-weight:700}.watchEp:hover{background:#202734}.watchEp.on{background:#ed101c;border-color:#ed101c}.watchEp.hidden{display:none}
+.empty{color:#aaa;padding:20px 0}.smallnote{font-size:12px;color:#888;margin-top:8px}
+@media(max-width:760px){.nav{display:none}.search{width:150px}.top{padding:0 12px;gap:10px}.main{padding-left:12px;padding-right:12px}.rail{grid-auto-columns:42vw}.hero{min-height:62vh;padding-left:16px;padding-right:16px}.page{padding-left:12px;padding-right:12px}.grid{grid-template-columns:repeat(2,1fr)}.detailBox{margin-left:16px;margin-right:16px}.detailBox h1{font-size:32px}.episodes{padding-left:16px;padding-right:16px}.watchShell{grid-template-columns:1fr}.watchSide{min-height:auto;border-left:0;border-top:1px solid #272d36}.watchEpRow{grid-template-columns:repeat(5,minmax(0,1fr))}.watchFooter{padding:12px}.playerStage{aspect-ratio:16/9}}
 </style></head><body>
 
 <header class="top">
@@ -34,8 +40,34 @@
 <section id="detailView" class="page detailPage"><div id="detailContent"></div></section>
 
 <div id="watchView" class="watch">
-  <div class="watchTop"><button class="iconbtn" onclick="closeWatch()">←</button><div id="watchTitle" class="watchTitle"></div><button class="iconbtn" onclick="toggleFavCurrent()">♡</button></div>
-  <div class="watchBody"><div id="player"></div><div id="watchEpisodes" class="watchEpisodes"></div></div>
+  <div class="watchTop">
+    <button class="iconbtn" onclick="closeWatch()">←</button>
+    <div id="watchTitle" class="watchTitle"></div>
+    <button class="iconbtn" onclick="toggleFavCurrent()">♡</button>
+  </div>
+  <div class="watchShell">
+    <main class="watchMain">
+      <div class="playerStage"><div id="player"></div></div>
+      <div class="watchFooter">
+        <div class="nowPlaying">
+          <h2 id="episodeTitle">Đang phát</h2>
+          <div class="watchNav">
+            <button id="prevEpBtn" onclick="playRelative(-1)">← Tập trước</button>
+            <button id="nextEpBtn" onclick="playRelative(1)">Tập tiếp →</button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <aside class="watchSide">
+      <div class="sideHead">
+        <div id="sideMovie" class="sideMovie"></div>
+        <div id="sideOrigin" class="sideOrigin"></div>
+        <span id="sideServer" class="serverPill">Vietsub</span>
+      </div>
+      <div class="epSearch"><input id="episodeSearch" placeholder="Tìm tập... (vd: 5, 12)" oninput="filterEpisodes()"></div>
+      <div id="watchEpisodes" class="watchEpisodes"></div>
+    </aside>
+  </div>
 </div>
 
 <script>
@@ -103,12 +135,34 @@ function renderWatchEpisodes(activeSi=-1,activeEi=-1){
   const box=document.querySelector('#watchEpisodes');
   if(!box)return;
   if(!currentEpisodes.length){box.innerHTML='<div class=empty>Phim này chưa có danh sách tập.</div>';return}
-  box.innerHTML=currentEpisodes.map((sv,si)=>`<div class=watchServer><div class=watchServerName>${esc(sv.server_name||('Server '+(si+1)))}</div><div class=watchEpRow>${(sv.server_data||[]).map((ep,ei)=>`<button class="watchEp ${si===activeSi&&ei===activeEi?'on':''}" onclick="playEpisode(${si},${ei})">${esc(ep.name||('Tập '+(ei+1)))}</button>`).join('')}</div></div>`).join('');
+  box.innerHTML=currentEpisodes.map((sv,si)=>`<div class=watchServer><div class=watchServerName>${esc(sv.server_name||('Server '+(si+1)))}</div><div class=watchEpRow>${(sv.server_data||[]).map((ep,ei)=>`<button class="watchEp ${si===activeSi&&ei===activeEi?'on':''}" data-ep="${esc(String(ep.name||ei+1)).toLowerCase()}" onclick="playEpisode(${si},${ei})">${esc(ep.name||String(ei+1).padStart(2,'0'))}</button>`).join('')}</div></div>`).join('');
+}
+function filterEpisodes(){
+  const q=(document.querySelector('#episodeSearch')?.value||'').trim().toLowerCase();
+  document.querySelectorAll('.watchEp').forEach(b=>b.classList.toggle('hidden',q && !b.dataset.ep.includes(q)));
+}
+function flatEpisodeList(){
+  const out=[];
+  currentEpisodes.forEach((sv,si)=>(sv.server_data||[]).forEach((ep,ei)=>out.push({si,ei,ep})));
+  return out;
+}
+function playRelative(delta){
+  const all=flatEpisodeList();
+  const idx=all.findIndex(x=>currentWatchKey===currentMovie.slug+'|'+x.si+'|'+x.ei);
+  const next=all[idx+delta];
+  if(next)playEpisode(next.si,next.ei);
 }
 function playEpisode(si,ei){
   let ep=currentEpisodes?.[si]?.server_data?.[ei];if(!ep)return;
   renderWatchEpisodes(si,ei);
   closePlayerOnly();watchView.classList.add('on');watchTitle.textContent=`${currentMovie.name} · ${ep.name||'Tập'}`;currentWatchKey=currentMovie.slug+'|'+si+'|'+ei;
+  episodeTitle.textContent=`${ep.name||('Tập '+(ei+1))} · ${currentMovie.name||''}`;
+  sideMovie.textContent=currentMovie.name||'';
+  sideOrigin.textContent=[currentMovie.origin_name,currentMovie.year].filter(Boolean).join(' · ');
+  sideServer.textContent=currentEpisodes?.[si]?.server_name||'Server';
+  if(episodeSearch) episodeSearch.value='';
+  const all=flatEpisodeList(),idx=all.findIndex(x=>x.si===si&&x.ei===ei);
+  prevEpBtn.disabled=idx<=0; nextEpBtn.disabled=idx<0||idx>=all.length-1;
   state.history[currentMovie.slug]={movie:currentMovie,updated:Date.now()};saveState();
   let m3u8=ep.link_m3u8||'',embed=ep.link_embed||'';
   // Ưu tiên player nhúng do nguồn API cung cấp. Cách này tránh lỗi CORS

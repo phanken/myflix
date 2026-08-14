@@ -40,3 +40,11 @@ Dữ liệu/phim được lấy từ API nguồn. Khả năng phát phụ thuộ
 - Chuyển tập không cần quay lại trang chi tiết.
 - Backend fallback từ `/phim/{slug}` sang `/v1/api/phim/{slug}` nếu format đầu không trả tập.
 - Chuẩn hóa cả `episodes -> server_data` và danh sách tập phẳng.
+
+
+## Watch Layout Update
+- Màn xem phim đổi sang bố cục giống ảnh mẫu: player lớn bên trái, danh sách tập cố định bên phải.
+- Sidebar có tên phim, tên gốc/năm, server, ô tìm tập.
+- Tập đang phát tô đỏ.
+- Có nút Tập trước / Tập tiếp dưới player.
+- Trên điện thoại sidebar tự chuyển xuống dưới player.
