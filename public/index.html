@@ -100,15 +100,23 @@ function playEpisode(si,ei){
   closePlayerOnly();watchView.classList.add('on');watchTitle.textContent=`${currentMovie.name} · ${ep.name||'Tập'}`;currentWatchKey=currentMovie.slug+'|'+si+'|'+ei;
   state.history[currentMovie.slug]={movie:currentMovie,updated:Date.now()};saveState();
   let m3u8=ep.link_m3u8||'',embed=ep.link_embed||'';
-  if(m3u8){
+  // Ưu tiên player nhúng do nguồn API cung cấp. Cách này tránh lỗi CORS
+  // khi trình duyệt gọi trực tiếp playlist/segment HLS từ CDN khác domain.
+  if(embed){
+    player.innerHTML=`<iframe allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin" src="${embed}"></iframe>`;
+  } else if(m3u8){
     let v=document.createElement('video');v.controls=true;v.autoplay=true;v.playsInline=true;player.appendChild(v);
     v.addEventListener('loadedmetadata',()=>{let p=state.progress[currentWatchKey];if(p&&p.time<v.duration-15)v.currentTime=p.time});
     v.addEventListener('timeupdate',()=>{clearTimeout(saveTimer);saveTimer=setTimeout(()=>{state.progress[currentWatchKey]={slug:currentMovie.slug,movie:currentMovie,episode:ep.name||'',time:v.currentTime||0,duration:v.duration||0,updated:Date.now()};saveState()},600)});
     if(v.canPlayType('application/vnd.apple.mpegurl')){v.src=m3u8}
-    else if(Hls.isSupported()){hls=new Hls();hls.loadSource(m3u8);hls.attachMedia(v)}
-    else if(embed){player.innerHTML=`<iframe allowfullscreen src="${embed}"></iframe>`}
-  } else if(embed){player.innerHTML=`<iframe allowfullscreen src="${embed}"></iframe>`}
-  else player.innerHTML='<p class=empty>Không có nguồn phát.</p>'
+    else if(Hls.isSupported()){
+      hls=new Hls({enableWorker:true});
+      hls.loadSource(m3u8);hls.attachMedia(v);
+      hls.on(Hls.Events.ERROR,(_,data)=>{
+        if(data.fatal) player.innerHTML='<p class=empty>Không phát được nguồn HLS của tập này.</p>';
+      });
+    } else player.innerHTML='<p class=empty>Trình duyệt không hỗ trợ nguồn HLS này.</p>';
+  } else player.innerHTML='<p class=empty>Không có nguồn phát.</p>'
 }
 function closePlayerOnly(){if(hls){hls.destroy();hls=null}player.innerHTML=''}
 function closeWatch(){closePlayerOnly();watchView.classList.remove('on');if(currentMovie?.slug)openMovie(currentMovie.slug)}

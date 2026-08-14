@@ -25,3 +25,10 @@ Tùy chọn Environment:
 
 ## Lưu ý
 Dữ liệu/phim được lấy từ API nguồn. Khả năng phát phụ thuộc link mà API trả về và chính sách/CORS của nguồn.
+
+
+## V3 Player Fix
+- Ưu tiên `link_embed` của nguồn phim để phát bằng iframe.
+- `link_m3u8` chỉ dùng làm fallback.
+- Thêm quyền autoplay/fullscreen cho iframe.
+- Có thông báo khi fallback HLS gặp lỗi fatal.
