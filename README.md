@@ -62,3 +62,9 @@ Dữ liệu/phim được lấy từ API nguồn. Khả năng phát phụ thuộ
 - Thêm menu `Thể loại` dạng dropdown.
 - Danh sách thể loại tải động từ `/the-loai`.
 - Chọn thể loại mở danh sách phim qua `/v1/api/the-loai/{slug}`.
+
+
+## Mobile Menu Fix
+- Thêm nút hamburger ☰ trên màn hình <= 600px.
+- Menu mobile có Trang chủ, Phim chiếu rạp, Phim lẻ, Phim bộ, Thể loại, Yêu thích.
+- Thể loại trên mobile mở riêng thành grid 2 cột.
