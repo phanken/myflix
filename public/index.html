@@ -17,7 +17,8 @@
 .heroContent{position:relative;z-index:2;width:min(650px,92vw)}.hero h1{font-size:clamp(34px,6vw,64px);margin:0 0 12px;line-height:1}.heroMeta{color:#ddd;margin:8px 0}.heroDesc{color:#ddd;line-height:1.55;max-width:620px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .btn{border:0;border-radius:6px;padding:11px 18px;font-weight:800;cursor:pointer;margin-right:8px}.play{background:#fff;color:#000}.more{background:#666a;color:#fff}.fav.active{background:var(--red)}
 .main{position:relative;z-index:4;margin-top:-20px;padding:0 4vw 55px}.section{margin:20px 0 30px}.section h2{font-size:22px;margin:0 0 12px}.rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(165px,17vw);gap:10px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.rail::-webkit-scrollbar{display:none}
-.card{background:var(--card);border-radius:7px;overflow:hidden;cursor:pointer;transition:.18s transform}.card:hover{transform:scale(1.045);z-index:3}.poster{aspect-ratio:2/3;background:#202020}.poster img{width:100%;height:100%;object-fit:cover;display:block}.info{padding:8px}.title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{font-size:12px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card{background:var(--card);border-radius:7px;overflow:hidden;cursor:pointer;transition:.18s transform;position:relative}.card:hover{transform:scale(1.045);z-index:3}.poster{aspect-ratio:2/3;background:#202020}
+.continueRemove{position:absolute;top:7px;right:7px;z-index:5;width:30px;height:30px;border:0;border-radius:50%;background:#000b;color:#fff;font-size:18px;line-height:30px;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center}.continueRemove:hover{background:#e50914}.poster img{width:100%;height:100%;object-fit:cover;display:block}.info{padding:8px}.title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{font-size:12px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .progress{height:4px;background:#444;margin-top:7px}.progress>div{height:100%;background:var(--red)}.badge{display:inline-block;background:#222;padding:2px 5px;border-radius:4px;font-size:11px;color:#ddd;margin-right:4px}
 .page{display:none;padding:86px 4vw 50px;min-height:100vh}.page.on{display:block}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px}.pager{display:flex;justify-content:center;gap:10px;margin:25px}
 .detailPage{padding-top:64px}.backdrop{height:58vh;position:relative;background:center/cover no-repeat}.backdrop:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#080808 0%,#08080870 45%,transparent 80%),linear-gradient(90deg,#080808b8,transparent)}.detailBox{position:relative;margin:-155px 5vw 0;z-index:2;max-width:900px}.detailBox h1{font-size:42px;margin:0 0 10px}.chips{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.chip{background:#222;padding:6px 9px;border-radius:4px;color:#ddd;font-size:13px}.desc{line-height:1.6;color:#ddd}.episodes{padding:25px 5vw 60px}.server{margin:22px 0}.epgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}.epbtn{background:#232323;color:white;border:1px solid #333;border-radius:6px;padding:10px;cursor:pointer}.epbtn:hover{background:#3a3a3a}.epbtn.watched{border-color:#c53030}
@@ -42,7 +43,7 @@
 </style></head><body>
 
 <header class="top">
-  <div class="brand" onclick="goHome()">Ken-FLIX</div><button class="mobileMenuBtn" onclick="toggleMobileMenu(event)">☰</button>
+  <div class="brand" onclick="goHome()">MYFLIX</div><button class="mobileMenuBtn" onclick="toggleMobileMenu(event)">☰</button>
   <nav class="nav">
     <a onclick="goHome()">Trang chủ</a>
     <a onclick="browse('phim-chieu-rap','Phim chiếu rạp')">Phim chiếu rạp</a>
@@ -67,7 +68,7 @@
 </div>
 
 <section id="homeView">
-  <div id="hero" class="hero"><div class="heroContent"><h1 id="heroTitle">Ken-Flix</h1><div id="heroMeta" class="heroMeta">Đang tải phim...</div><p id="heroDesc" class="heroDesc"></p><div><button id="heroPlay" class="btn play">▶ Xem ngay</button><button id="heroMore" class="btn more">ⓘ Chi tiết</button></div></div></div>
+  <div id="hero" class="hero"><div class="heroContent"><h1 id="heroTitle">MyFlix</h1><div id="heroMeta" class="heroMeta">Đang tải phim...</div><p id="heroDesc" class="heroDesc"></p><div><button id="heroPlay" class="btn play">▶ Xem ngay</button><button id="heroMore" class="btn more">ⓘ Chi tiết</button></div></div></div>
   <main id="homeMain" class="main"></main>
 </section>
 
@@ -117,11 +118,12 @@ async function api(u){let r=await fetch(u),j=await r.json();if(!r.ok||j.ok===fal
 function image(x){return x.poster_abs||x.thumb_abs||x.poster_url||x.thumb_url||''}
 function fkey(x){return x.slug||x._id||x.name}
 function progressFor(slug){let all=Object.values(state.progress).filter(x=>x.slug===slug).sort((a,b)=>(b.updated||0)-(a.updated||0));return all[0]||null}
-function card(x){
+function card(x,opts={}){
  const pr=progressFor(x.slug),pc=pr&&pr.duration?Math.min(100,pr.time/pr.duration*100):0;
- return `<div class=card onclick='openMovie(${JSON.stringify(x.slug)})'><div class=poster>${image(x)?`<img src="${image(x)}" loading=lazy>`:''}</div><div class=info><div class=title>${esc(x.name)}</div><div class=meta>${esc(x.origin_name||'')} ${x.year?'· '+x.year:''}</div>${pc>1?`<div class=progress><div style="width:${pc}%"></div></div>`:''}</div></div>`
+ const remove=opts.removable?`<button class="continueRemove" title="Xóa khỏi Tiếp tục xem" onclick='event.stopPropagation();removeContinue(${JSON.stringify(x.slug)})'>×</button>`:'';
+ return `<div class=card onclick='openMovie(${JSON.stringify(x.slug)})'>${remove}<div class=poster>${image(x)?`<img src="${image(x)}" loading=lazy>`:''}</div><div class=info><div class=title>${esc(x.name)}</div><div class=meta>${esc(x.origin_name||'')} ${x.year?'· '+x.year:''}</div>${pc>1?`<div class=progress><div style="width:${pc}%"></div></div>`:''}</div></div>`
 }
-function rail(title,items){if(!items.length)return'';return `<section class=section><h2>${esc(title)}</h2><div class=rail>${items.map(card).join('')}</div></section>`}
+function rail(title,items,opts={}){if(!items.length)return'';return `<section class=section><h2>${esc(title)}</h2><div class=rail>${items.map(x=>card(x,opts)).join('')}</div></section>`}
 async function initHome(){
   try{
     const [a,cinema,b,c]=await Promise.all([
@@ -136,7 +138,7 @@ async function initHome(){
     let favs=Object.values(state.favorites||{});
     let continueItems=Object.values(state.progress||{}).filter(x=>x.duration&&x.time>30&&x.time<x.duration-45).sort((x,y)=>y.updated-x.updated).map(p=>p.movie).filter(Boolean);
     homeMain.innerHTML=
-      rail('▶ Tiếp tục xem',uniqueBySlug(continueItems).slice(0,20))+
+      rail('▶ Tiếp tục xem',uniqueBySlug(continueItems).slice(0,20),{removable:true})+
       rail('🔥 Mới cập nhật',homeItems.slice(0,24))+
       rail('🍿 Phim chiếu rạp',cinema.items||[])+
       rail('🎬 Phim lẻ',b.items||[])+
@@ -145,6 +147,11 @@ async function initHome(){
   }catch(e){homeMain.innerHTML=`<p class=empty>${esc(e.message)}</p>`}
 }
 function uniqueBySlug(a){let s=new Set();return a.filter(x=>x?.slug&&!s.has(x.slug)&&s.add(x.slug))}
+function removeContinue(slug){
+  Object.keys(state.progress||{}).forEach(k=>{if(state.progress[k]?.slug===slug)delete state.progress[k]});
+  saveState();
+  initHome();
+}
 async function setHero(x){
   let m=x;try{let d=await api('/api/movie/'+encodeURIComponent(x.slug));m={...x,...d.movie}}catch{}
   hero.style.backgroundImage=`url("${m.thumb_abs||m.poster_abs||image(m)}")`;
