@@ -223,24 +223,58 @@ function playEpisode(si,ei){
   const all=flatEpisodeList(),idx=all.findIndex(x=>x.si===si&&x.ei===ei);
   prevEpBtn.disabled=idx<=0; nextEpBtn.disabled=idx<0||idx>=all.length-1;
   state.history[currentMovie.slug]={movie:currentMovie,updated:Date.now()};saveState();
+
   let m3u8=ep.link_m3u8||'',embed=ep.link_embed||'';
-  // Ưu tiên player nhúng do nguồn API cung cấp. Cách này tránh lỗi CORS
-  // khi trình duyệt gọi trực tiếp playlist/segment HLS từ CDN khác domain.
-  if(embed){
-    player.innerHTML=`<iframe allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin" src="${embed}"></iframe>`;
-  } else if(m3u8){
-    let v=document.createElement('video');v.controls=true;v.autoplay=true;v.playsInline=true;player.appendChild(v);
-    v.addEventListener('loadedmetadata',()=>{let p=state.progress[currentWatchKey];if(p&&p.time<v.duration-15)v.currentTime=p.time});
+  const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  function autoNext(){
+    const list=flatEpisodeList();
+    const pos=list.findIndex(x=>x.si===si&&x.ei===ei);
+    const next=list[pos+1];
+    if(next) setTimeout(()=>playEpisode(next.si,next.ei),350);
+  }
+  function makeVideo(){
+    let v=document.createElement('video');
+    v.controls=true;v.autoplay=true;v.playsInline=true;
+    v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');
+    player.appendChild(v);
+    v.addEventListener('loadedmetadata',()=>{
+      let p=state.progress[currentWatchKey];if(p&&p.time<v.duration-15)v.currentTime=p.time;
+      const promise=v.play(); if(promise?.catch) promise.catch(()=>{});
+    });
+    v.addEventListener('canplay',()=>{if(v.paused){const promise=v.play();if(promise?.catch)promise.catch(()=>{})}},{once:true});
+    v.addEventListener('ended',autoNext);
     v.addEventListener('timeupdate',()=>{clearTimeout(saveTimer);saveTimer=setTimeout(()=>{state.progress[currentWatchKey]={slug:currentMovie.slug,movie:currentMovie,episode:ep.name||'',time:v.currentTime||0,duration:v.duration||0,updated:Date.now()};saveState()},600)});
-    if(v.canPlayType('application/vnd.apple.mpegurl')){v.src=m3u8}
+    return v;
+  }
+  function useEmbed(){
+    if(!embed){player.innerHTML='<p class=empty>Không có nguồn phát.</p>';return}
+    const sep=embed.includes('?')?'&':'?';
+    player.innerHTML=`<iframe allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin" src="${embed}${sep}autoplay=1"></iframe>`;
+  }
+
+  // Mobile ưu tiên HLS trực tiếp để có thể play() ngay sau cú bấm và bắt sự kiện ended để tự chuyển tập.
+  // Desktop vẫn ưu tiên embed vì tương thích nguồn tốt hơn.
+  if(m3u8 && isMobile){
+    const v=makeVideo();
+    if(v.canPlayType('application/vnd.apple.mpegurl')){
+      v.src=m3u8; v.load(); const promise=v.play(); if(promise?.catch)promise.catch(()=>{});
+    }else if(Hls.isSupported()){
+      hls=new Hls({enableWorker:true});hls.loadSource(m3u8);hls.attachMedia(v);
+      hls.on(Hls.Events.MANIFEST_PARSED,()=>{const promise=v.play();if(promise?.catch)promise.catch(()=>{})});
+      hls.on(Hls.Events.ERROR,(_,data)=>{if(data.fatal){closePlayerOnly();useEmbed()}});
+    }else useEmbed();
+  }else if(embed){
+    useEmbed();
+  }else if(m3u8){
+    const v=makeVideo();
+    if(v.canPlayType('application/vnd.apple.mpegurl')){v.src=m3u8;v.load();const promise=v.play();if(promise?.catch)promise.catch(()=>{})}
     else if(Hls.isSupported()){
-      hls=new Hls({enableWorker:true});
-      hls.loadSource(m3u8);hls.attachMedia(v);
-      hls.on(Hls.Events.ERROR,(_,data)=>{
-        if(data.fatal) player.innerHTML='<p class=empty>Không phát được nguồn HLS của tập này.</p>';
-      });
-    } else player.innerHTML='<p class=empty>Trình duyệt không hỗ trợ nguồn HLS này.</p>';
-  } else player.innerHTML='<p class=empty>Không có nguồn phát.</p>'
+      hls=new Hls({enableWorker:true});hls.loadSource(m3u8);hls.attachMedia(v);
+      hls.on(Hls.Events.MANIFEST_PARSED,()=>{const promise=v.play();if(promise?.catch)promise.catch(()=>{})});
+      hls.on(Hls.Events.ERROR,(_,data)=>{if(data.fatal)player.innerHTML='<p class=empty>Không phát được nguồn HLS của tập này.</p>'});
+    }
+  }else player.innerHTML='<p class=empty>Không có nguồn phát.</p>'
 }
 function closePlayerOnly(){if(hls){hls.destroy();hls=null}player.innerHTML=''}
 function closeWatch(){closePlayerOnly();watchView.classList.remove('on');if(currentMovie?.slug)openMovie(currentMovie.slug)}
