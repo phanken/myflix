@@ -24,12 +24,11 @@
 .watch{position:fixed;inset:0;background:#07090d;z-index:50;display:none;overflow:hidden}.watch.on{display:block}
 .watchTop{height:62px;display:flex;align-items:center;gap:12px;padding:0 18px;background:#080b10;border-bottom:1px solid #202631;position:sticky;top:0;z-index:5}.watchTitle{font-weight:800;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .watchShell{height:calc(100vh - 62px);display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:0;background:#080b10;width:100%;min-width:0;overflow:hidden}
-.watchMain{min-width:0;height:100%;background:#05070a;display:flex;flex-direction:column;overflow:hidden}.playerStage{position:relative;min-height:0;flex:1;background:#000;overflow:hidden}.playerStage #player{position:absolute;inset:0;width:100%;height:100%}.playerLogo{position:absolute;top:18px;right:22px;width:150px;max-width:18%;height:auto;z-index:20;opacity:.68;pointer-events:none;filter:drop-shadow(0 2px 5px #000)}.watch video,.watch iframe{width:100%;height:100%;border:0;background:#000;display:block;object-fit:contain}
+.watchMain{min-width:0;height:100%;background:#05070a;display:flex;flex-direction:column;overflow:hidden}.playerStage{position:relative;min-height:0;flex:1;background:#000;overflow:hidden}.playerStage #player{position:absolute;inset:0;width:100%;height:100%}.watch video,.watch iframe{width:100%;height:100%;border:0;background:#000;display:block;object-fit:contain}
 .watchFooter{padding:14px 18px 20px;background:#090c11;border-top:1px solid #1b222d}.nowPlaying{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.nowPlaying h2{font-size:20px;margin:0;flex:1}.watchNav{display:flex;gap:8px}.watchNav button{border:1px solid #2a3340;background:#121821;color:#fff;border-radius:7px;padding:9px 13px;cursor:pointer}.watchNav button:hover{background:#202936}
 .watchSide{background:#10141b;border-left:1px solid #272d36;height:100%;min-height:0;display:flex;flex-direction:column;width:360px;min-width:360px;overflow:hidden}.sideHead{padding:17px 16px 13px;border-bottom:1px solid #252b34}.sideMovie{font-size:19px;font-weight:800}.sideOrigin{color:#8d98a8;font-size:13px;margin-top:4px}.serverPill{display:inline-block;margin-top:12px;border:1px solid #159b60;color:#2bd481;padding:6px 10px;border-radius:7px;font-size:12px}.epSearch{padding:12px 14px;border-bottom:1px solid #252b34}.epSearch input{width:100%;background:#151a22;border:1px solid #2a313c;color:#fff;border-radius:9px;padding:10px 11px;outline:none}.watchEpisodes{padding:12px 14px 20px;overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;scrollbar-gutter:stable}.watchServer{margin:0 0 14px}.watchServerName{font-size:12px;color:#8b97a7;margin:0 0 8px}.watchEpRow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.watchEp{height:43px;border:1px solid #2a313d;background:#141922;color:#fff;border-radius:8px;padding:0 4px;cursor:pointer;font-weight:700}.watchEp:hover{background:#202734}.watchEp.on{background:#ed101c;border-color:#ed101c}.watchEp.hidden{display:none}
 .empty{color:#aaa;padding:20px 0}.smallnote{font-size:12px;color:#888;margin-top:8px}
 @media(max-width:600px){
-.playerLogo{top:10px;right:10px;width:95px;max-width:25%;opacity:.65}
 .nav{display:none}.mobileMenuBtn{display:block}.search{width:115px}.top{padding:0 10px;gap:8px}.main{padding-left:10px;padding-right:10px}.rail{grid-auto-columns:44vw}.hero{min-height:62vh;padding-left:14px;padding-right:14px}.page{padding-left:10px;padding-right:10px}.grid{grid-template-columns:repeat(2,1fr)}.detailBox{margin-left:14px;margin-right:14px}.detailBox h1{font-size:30px}.episodes{padding-left:14px;padding-right:14px}
 .watch{overflow-y:auto;overflow-x:hidden}
 .watchShell{display:block;min-width:0;width:100%;height:auto;overflow:visible}
@@ -84,7 +83,7 @@
   </div>
   <div class="watchShell">
     <main class="watchMain">
-      <div class="playerStage"><div id="player"></div><img class="playerLogo" src="/ken-flix-logo.png" alt="Ken-Flix"></div>
+      <div class="playerStage"><div id="player"></div></div>
       <div class="watchFooter">
         <div class="nowPlaying">
           <h2 id="episodeTitle">Đang phát</h2>
