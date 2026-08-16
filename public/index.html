@@ -260,9 +260,18 @@ function playEpisode(si,ei){
     player.innerHTML=`<iframe allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="origin" src="${embed}${sep}autoplay=1"></iframe>`;
   }
 
-  // Mobile ưu tiên player embed của nguồn để tránh HLS trực tiếp bị đứng ở 0:00.
-  // Desktop cũng ưu tiên embed. Chỉ dùng m3u8 khi tập không có link_embed.
-  if(embed){
+  // Mobile ưu tiên HLS trực tiếp để có thể play() ngay sau cú bấm và bắt sự kiện ended để tự chuyển tập.
+  // Desktop vẫn ưu tiên embed vì tương thích nguồn tốt hơn.
+  if(m3u8 && isMobile){
+    const v=makeVideo();
+    if(v.canPlayType('application/vnd.apple.mpegurl')){
+      v.src=m3u8; v.load(); const promise=v.play(); if(promise?.catch)promise.catch(()=>{});
+    }else if(Hls.isSupported()){
+      hls=new Hls({enableWorker:true});hls.loadSource(m3u8);hls.attachMedia(v);
+      hls.on(Hls.Events.MANIFEST_PARSED,()=>{const promise=v.play();if(promise?.catch)promise.catch(()=>{})});
+      hls.on(Hls.Events.ERROR,(_,data)=>{if(data.fatal){closePlayerOnly();useEmbed()}});
+    }else useEmbed();
+  }else if(embed){
     useEmbed();
   }else if(m3u8){
     const v=makeVideo();
