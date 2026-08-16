@@ -232,16 +232,6 @@ function playEpisode(si,ei){
   state.history[currentMovie.slug]={movie:currentMovie,updated:Date.now()};saveState();
 
   let m3u8=ep.link_m3u8||'',embed=ep.link_embed||'';
-
-  // Android TV APK: send the exact stream URL from the movie API directly
-  // to the native bridge. Browsers continue using the normal web player below.
-  if(m3u8 && window.MyFlixTV && typeof window.MyFlixTV.play==='function'){
-    try{
-      window.MyFlixTV.play(m3u8,`${currentMovie.name||''} · ${ep.name||'Tập'}`);
-      return;
-    }catch(e){}
-  }
-
   const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   function autoNext(){
