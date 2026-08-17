@@ -7,7 +7,7 @@ const API = process.env.KKPHIM_API || 'https://phimapi.com';
 app.use(express.static('public'));
 
 async function jfetch(url){
-  const r = await fetch(url,{headers:{accept:'application/json','user-agent':'MyFlix-KKPhim/3.0'}});
+  const r = await fetch(url,{headers:{accept:'application/json','user-agent':'KenFlix-KKPhim/3.0'}});
   const t = await r.text();
   let d; try{d=JSON.parse(t)}catch{throw new Error('API trả dữ liệu không phải JSON')}
   if(!r.ok) throw new Error(d?.message || d?.msg || `HTTP ${r.status}`);
@@ -54,6 +54,22 @@ app.get('/api/genre/:slug',async(req,res)=>{
     res.json({ok:true,...normList(await jfetch(`${API}/v1/api/the-loai/${encodeURIComponent(req.params.slug)}?${q}`))})
   }catch(e){res.status(500).json({ok:false,error:e.message})}
 });
+
+app.get('/api/countries',async(req,res)=>{
+  try{
+    const d=await jfetch(`${API}/quoc-gia`);
+    const items=d?.data?.items||d?.items||[];
+    res.json({ok:true,items});
+  }catch(e){res.status(500).json({ok:false,error:e.message})}
+});
+
+app.get('/api/country/:slug',async(req,res)=>{
+  try{
+    const q=new URLSearchParams(req.query);
+    res.json({ok:true,...normList(await jfetch(`${API}/v1/api/quoc-gia/${encodeURIComponent(req.params.slug)}?${q}`))})
+  }catch(e){res.status(500).json({ok:false,error:e.message})}
+});
+
 app.get('/api/search',async(req,res)=>{
   try{
     const kw=String(req.query.q||'').trim();

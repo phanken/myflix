@@ -1,4 +1,4 @@
-# MyFlix KKPhim V3
+# KenFlix KKPhim V3
 
 V3 chỉ dùng KKPhim / PhimAPI, không dùng OneDrive hay Google Drive.
 

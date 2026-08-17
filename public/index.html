@@ -1,5 +1,5 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MyFlix V3</title><script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+<title>KenFlix V3</title><script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
 <style>
 :root{--red:#e50914;--bg:#080808;--card:#171717;--muted:#a8a8a8}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:#fff;font-family:Arial,sans-serif}
@@ -46,25 +46,29 @@
   <div class="brand" onclick="goHome()">Ken-FLIX</div><button class="mobileMenuBtn" onclick="toggleMobileMenu(event)">☰</button>
   <nav class="nav">
     <a onclick="goHome()">Trang chủ</a>
-    <a onclick="browse('phim-chieu-rap','Phim chiếu rạp')">Phim chiếu rạp</a>
-    <a onclick="browse('phim-le','Phim lẻ')">Phim lẻ</a>
-    <a onclick="browse('phim-bo','Phim bộ')">Phim bộ</a>
     <div id="genreMenu" class="genreMenu">
-      <span class="genreToggle" onclick="toggleGenres(event)">Thể loại ▾</span>
+      <span class="genreToggle" onclick="toggleMenu(event,'genreMenu','genres')">Thể Loại ▾</span>
       <div id="genreDropdown" class="genreDropdown"></div>
     </div>
-    <a onclick="showFavorites()">Yêu thích</a>
+    <div id="countryMenu" class="genreMenu">
+      <span class="genreToggle" onclick="toggleMenu(event,'countryMenu','countries')">Quốc Gia ▾</span>
+      <div id="countryDropdown" class="genreDropdown"></div>
+    </div>
+    <div id="listMenu" class="genreMenu">
+      <span class="genreToggle" onclick="toggleMenu(event,'listMenu','lists')">Danh Sách ▾</span>
+      <div id="listDropdown" class="genreDropdown"></div>
+    </div>
   </nav>
   <div class="searchWrap"><input id="q" class="search" placeholder="Tìm phim..."><button class="iconbtn" onclick="doSearch()">⌕</button></div>
 </header>
 <div id="mobileDrawer" class="mobileDrawer">
   <a onclick="mobileGoHome()">Trang chủ</a>
-  <a onclick="mobileBrowse('phim-chieu-rap','Phim chiếu rạp')">Phim chiếu rạp</a>
-  <a onclick="mobileBrowse('phim-le','Phim lẻ')">Phim lẻ</a>
-  <a onclick="mobileBrowse('phim-bo','Phim bộ')">Phim bộ</a>
-  <div class="mobileGenreToggle" onclick="toggleMobileGenres()">Thể loại ▾</div>
+  <div class="mobileGenreToggle" onclick="toggleMobileSection('genres')">Thể Loại ▾</div>
   <div id="mobileGenres" class="mobileGenres"></div>
-  <a onclick="mobileFavorites()">Yêu thích</a>
+  <div class="mobileGenreToggle" onclick="toggleMobileSection('countries')">Quốc Gia ▾</div>
+  <div id="mobileCountries" class="mobileGenres"></div>
+  <div class="mobileGenreToggle" onclick="toggleMobileSection('lists')">Danh Sách ▾</div>
+  <div id="mobileLists" class="mobileGenres"></div>
 </div>
 
 <section id="homeView">
@@ -109,7 +113,7 @@
 
 <script>
 const $=s=>document.querySelector(s);
-let homeItems=[],currentMovie=null,currentEpisodes=[],browseMode='list',browseSlug='',browsePage=1,browseQuery='',hls=null,currentWatchKey='',saveTimer=null,genresLoaded=false;
+let homeItems=[],currentMovie=null,currentEpisodes=[],browseMode='list',browseSlug='',browsePage=1,browseQuery='',hls=null,currentWatchKey='',saveTimer=null,genresLoaded=false,countriesLoaded=false;
 let state=JSON.parse(localStorage.myflixState||'{"favorites":{},"progress":{},"history":{}}');
 function saveState(){localStorage.myflixState=JSON.stringify(state)}
 function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
@@ -155,14 +159,15 @@ function removeContinue(slug){
 async function setHero(x){
   let m=x;try{let d=await api('/api/movie/'+encodeURIComponent(x.slug));m={...x,...d.movie}}catch{}
   hero.style.backgroundImage=`url("${m.thumb_abs||m.poster_abs||image(m)}")`;
-  heroTitle.textContent=m.name||'MyFlix';heroMeta.textContent=[m.year,m.quality,m.lang,m.episode_current].filter(Boolean).join(' · ');
+  heroTitle.textContent=m.name||'KenFlix';heroMeta.textContent=[m.year,m.quality,m.lang,m.episode_current].filter(Boolean).join(' · ');
   heroDesc.textContent=strip(m.content||m.origin_name||'');
   heroMore.onclick=()=>openMovie(m.slug);heroPlay.onclick=()=>openMovie(m.slug,true);
 }
 function hideAll(){homeView.style.display='none';browseView.classList.remove('on');detailView.classList.remove('on')}
 function goHome(){closeWatch();hideAll();homeView.style.display='block';window.scrollTo(0,0);initHome()}
 async function browse(slug,title){closeGenres();hideAll();browseView.classList.add('on');browseMode='list';browseSlug=slug;browseQuery='';browsePage=1;browseTitle.textContent=title;loadBrowse()}
-async function browseGenre(slug,title){closeGenres();hideAll();browseView.classList.add('on');browseMode='genre';browseSlug=slug;browseQuery='';browsePage=1;browseTitle.textContent=title;loadBrowse()}
+async function browseGenre(slug,title){closeMenus();hideAll();browseView.classList.add('on');browseMode='genre';browseSlug=slug;browseQuery='';browsePage=1;browseTitle.textContent=title;loadBrowse()}
+async function browseCountry(slug,title){closeMenus();hideAll();browseView.classList.add('on');browseMode='country';browseSlug=slug;browseQuery='';browsePage=1;browseTitle.textContent=title;loadBrowse()}
 async function doSearch(){let k=q.value.trim();if(k.length<2)return;hideAll();browseView.classList.add('on');browseMode='search';browseQuery=k; browsePage=1;browseTitle.textContent='Kết quả: '+k;loadBrowse()}
 async function loadBrowse(){
   browseGrid.innerHTML='<p class=empty>Đang tải...</p>';
@@ -170,6 +175,7 @@ async function loadBrowse(){
     let j;
     if(browseMode==='search') j=await api(`/api/search?q=${encodeURIComponent(browseQuery)}&page=${browsePage}`);
     else if(browseMode==='genre') j=await api(`/api/genre/${encodeURIComponent(browseSlug)}?page=${browsePage}`);
+    else if(browseMode==='country') j=await api(`/api/country/${encodeURIComponent(browseSlug)}?page=${browsePage}`);
     else j=await api(`/api/list/${encodeURIComponent(browseSlug)}?page=${browsePage}`);
     browseGrid.innerHTML=(j.items||[]).map(card).join('')||'<p class=empty>Không có phim.</p>';
     let p=j.pagination||{};
@@ -286,48 +292,74 @@ function playEpisode(si,ei){
 function closePlayerOnly(){if(hls){hls.destroy();hls=null}player.innerHTML=''}
 function closeWatch(){closePlayerOnly();watchView.classList.remove('on');if(currentMovie?.slug)openMovie(currentMovie.slug)}
 
+const LIST_ITEMS=[
+  {slug:'phim-moi',name:'Phim Mới'},
+  {slug:'phim-bo',name:'Phim Bộ'},
+  {slug:'phim-le',name:'Phim Lẻ'},
+  {slug:'phim-chieu-rap',name:'Phim Chiếu Rạp'},
+  {slug:'tv-shows',name:'TV Shows'},
+  {slug:'hoat-hinh',name:'Hoạt Hình'}
+];
 async function loadGenres(){
   if(genresLoaded)return;
   try{
     const j=await api('/api/genres');
     genreDropdown.innerHTML=(j.items||[]).map(x=>`<div class="genreItem" onclick='browseGenre(${JSON.stringify(x.slug)},${JSON.stringify(x.name)})'>${esc(x.name)}</div>`).join('');
     genresLoaded=true;
-  }catch(e){
-    genreDropdown.innerHTML=`<div class="genreItem">${esc(e.message)}</div>`;
-  }
+  }catch(e){genreDropdown.innerHTML=`<div class="genreItem">${esc(e.message)}</div>`}
 }
-function toggleGenres(e){
-  e.stopPropagation();
-  genreMenu.classList.toggle('open');
-  if(genreMenu.classList.contains('open')) loadGenres();
-}
-function closeGenres(){genreMenu?.classList.remove('open')}
-document.addEventListener('click',e=>{if(!genreMenu?.contains(e.target))closeGenres()});
-
-
-async function ensureMobileGenres(){
-  if(mobileGenres.dataset.loaded==='1')return;
+async function loadCountries(){
+  if(countriesLoaded)return;
   try{
-    const j=await api('/api/genres');
-    mobileGenres.innerHTML=(j.items||[]).map(x=>`<div class="mobileGenreItem" onclick='mobileBrowseGenre(${JSON.stringify(x.slug)},${JSON.stringify(x.name)})'>${esc(x.name)}</div>`).join('');
-    mobileGenres.dataset.loaded='1';
-  }catch(e){
-    mobileGenres.innerHTML=`<div class="mobileGenreItem">${esc(e.message)}</div>`;
-  }
+    const j=await api('/api/countries');
+    countryDropdown.innerHTML=(j.items||[]).map(x=>`<div class="genreItem" onclick='browseCountry(${JSON.stringify(x.slug)},${JSON.stringify(x.name)})'>${esc(x.name)}</div>`).join('');
+    countriesLoaded=true;
+  }catch(e){countryDropdown.innerHTML=`<div class="genreItem">${esc(e.message)}</div>`}
 }
-function toggleMobileMenu(e){
-  e?.stopPropagation();
-  mobileDrawer.classList.toggle('open');
+function loadLists(){
+  listDropdown.innerHTML=LIST_ITEMS.map(x=>`<div class="genreItem" onclick='browse(${JSON.stringify(x.slug)},${JSON.stringify(x.name)})'>${esc(x.name)}</div>`).join('');
 }
-function closeMobileMenu(){mobileDrawer.classList.remove('open');mobileGenres.classList.remove('open')}
-async function toggleMobileGenres(){
-  await ensureMobileGenres();
-  mobileGenres.classList.toggle('open');
+async function toggleMenu(e,id,type){
+  e.stopPropagation();
+  const target=document.getElementById(id),was=target.classList.contains('open');
+  closeMenus();
+  if(was)return;
+  target.classList.add('open');
+  if(type==='genres')await loadGenres();
+  else if(type==='countries')await loadCountries();
+  else loadLists();
+}
+function closeMenus(){document.querySelectorAll('.genreMenu.open').forEach(x=>x.classList.remove('open'))}
+function closeGenres(){closeMenus()}
+document.addEventListener('click',e=>{if(!e.target.closest('.genreMenu'))closeMenus()});
+
+async function fillMobile(type){
+  const box=type==='genres'?mobileGenres:type==='countries'?mobileCountries:mobileLists;
+  if(box.dataset.loaded==='1')return;
+  try{
+    let items;
+    if(type==='genres')items=(await api('/api/genres')).items||[];
+    else if(type==='countries')items=(await api('/api/countries')).items||[];
+    else items=LIST_ITEMS;
+    box.innerHTML=items.map(x=>`<div class="mobileGenreItem" onclick='${type==='genres'?'mobileBrowseGenre':type==='countries'?'mobileBrowseCountry':'mobileBrowse'}(${JSON.stringify(x.slug)},${JSON.stringify(x.name)})'>${esc(x.name)}</div>`).join('');
+    box.dataset.loaded='1';
+  }catch(e){box.innerHTML=`<div class="mobileGenreItem">${esc(e.message)}</div>`}
+}
+function toggleMobileMenu(e){e?.stopPropagation();mobileDrawer.classList.toggle('open')}
+function closeMobileMenu(){
+  mobileDrawer.classList.remove('open');
+  [mobileGenres,mobileCountries,mobileLists].forEach(x=>x.classList.remove('open'));
+}
+async function toggleMobileSection(type){
+  const box=type==='genres'?mobileGenres:type==='countries'?mobileCountries:mobileLists;
+  await fillMobile(type);
+  [mobileGenres,mobileCountries,mobileLists].forEach(x=>{if(x!==box)x.classList.remove('open')});
+  box.classList.toggle('open');
 }
 function mobileGoHome(){closeMobileMenu();goHome()}
 function mobileBrowse(slug,title){closeMobileMenu();browse(slug,title)}
 function mobileBrowseGenre(slug,title){closeMobileMenu();browseGenre(slug,title)}
-function mobileFavorites(){closeMobileMenu();showFavorites()}
+function mobileBrowseCountry(slug,title){closeMobileMenu();browseCountry(slug,title)}
 document.addEventListener('click',e=>{
   if(window.innerWidth<=600 && !mobileDrawer.contains(e.target) && !e.target.closest('.mobileMenuBtn')) closeMobileMenu();
 });
