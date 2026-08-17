@@ -12,6 +12,10 @@
 .genreMenu{position:relative}.genreToggle{color:#ddd;font-size:14px;cursor:pointer;user-select:none}.genreToggle:hover{color:#fff}
 .genreDropdown{position:absolute;top:27px;left:-12px;width:520px;max-height:430px;overflow:auto;background:#111;border:1px solid #303030;border-radius:10px;padding:12px;display:none;grid-template-columns:repeat(3,1fr);gap:5px;box-shadow:0 16px 40px #000a}
 .genreMenu.open .genreDropdown{display:grid}.genreItem{padding:9px 10px;border-radius:6px;color:#ddd;font-size:13px;cursor:pointer}.genreItem:hover{background:#292929;color:#fff}
+
+#listDropdown{width:680px;grid-template-columns:repeat(3,minmax(180px,1fr));gap:2px 18px;padding:8px 10px}
+#listDropdown .genreItem{font-size:16px;padding:7px 0;border-radius:0;color:#fff;white-space:nowrap}
+#listDropdown .genreItem:hover{background:transparent;color:var(--red)}
 .searchWrap{margin-left:auto;display:flex;align-items:center;gap:8px}.search{width:260px;background:#111c;border:1px solid #666;color:white;padding:9px 11px;border-radius:5px}.iconbtn{border:0;background:#252525;color:#fff;padding:9px 11px;border-radius:6px;cursor:pointer}
 .hero{min-height:72vh;position:relative;display:flex;align-items:flex-end;padding:120px 5vw 62px;background:#111 center/cover no-repeat}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#080808f5 0%,#080808aa 35%,#08080820 70%),linear-gradient(0deg,#080808 0%,transparent 42%)}
 .heroContent{position:relative;z-index:2;width:min(650px,92vw)}.hero h1{font-size:clamp(34px,6vw,64px);margin:0 0 12px;line-height:1}.heroMeta{color:#ddd;margin:8px 0}.heroDesc{color:#ddd;line-height:1.55;max-width:620px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
@@ -294,11 +298,20 @@ function closeWatch(){closePlayerOnly();watchView.classList.remove('on');if(curr
 
 const LIST_ITEMS=[
   {slug:'phim-moi',name:'Phim Mới'},
+  {slug:'hoat-hinh',name:'Hoạt Hình'},
+  {slug:'phim-bo-dang-chieu',name:'Phim Bộ Đang Chiếu'},
+
   {slug:'phim-bo',name:'Phim Bộ'},
+  {slug:'phim-vietsub',name:'Phim Vietsub'},
+  {slug:'phim-bo-hoan-thanh',name:'Phim Bộ Đã Hoàn Thành'},
+
   {slug:'phim-le',name:'Phim Lẻ'},
-  {slug:'phim-chieu-rap',name:'Phim Chiếu Rạp'},
-  {slug:'tv-shows',name:'TV Shows'},
-  {slug:'hoat-hinh',name:'Hoạt Hình'}
+  {slug:'phim-thuyet-minh',name:'Phim Thuyết Minh'},
+  {slug:'subteam',name:'Subteam'},
+
+  {slug:'tv-shows',name:'Shows'},
+  {slug:'phim-long-tieng',name:'Phim Lồng Tiếng'},
+  {slug:'phim-chieu-rap',name:'Phim Chiếu Rạp'}
 ];
 async function loadGenres(){
   if(genresLoaded)return;
