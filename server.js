@@ -33,10 +33,65 @@ app.get('/api/home',async(req,res)=>{
   try{res.json({ok:true,...normList(await jfetch(`${API}/danh-sach/phim-moi-cap-nhat?page=${Number(req.query.page||1)}`))})}
   catch(e){res.status(500).json({ok:false,error:e.message})}
 });
+function seriesStatusText(x){
+  return String(x?.episode_current || x?.episodeCurrent || x?.status || '').trim().toLowerCase();
+}
+function isSeriesCompleted(x){
+  const t=seriesStatusText(x);
+  return /hoàn\s*tất|hoan\s*tat|full|complete|completed|trọn\s*bộ|tron\s*bo/.test(t);
+}
+function isSeriesOngoing(x){
+  const t=seriesStatusText(x);
+  if(!t || isSeriesCompleted(x)) return false;
+  if(/trailer|sắp\s*chiếu|sap\s*chieu|coming/.test(t)) return false;
+  return /tập|tap|episode|phần|phan|\d/.test(t);
+}
+async function filteredSeriesList(kind, reqPage){
+  const page=Math.max(1, Number(reqPage||1));
+  const perPage=24;
+
+  // KKPhim API không có type riêng cho 2 trạng thái này.
+  // Lấy nhiều trang "phim-bo" rồi lọc theo episode_current, sau đó tự phân trang.
+  const pagesToFetch=Math.min(18, Math.max(8, page*6));
+  const jobs=[];
+  for(let p=1;p<=pagesToFetch;p++){
+    jobs.push(jfetch(`${API}/v1/api/danh-sach/phim-bo?page=${p}`).then(normList).catch(()=>({items:[]})));
+  }
+  const chunks=await Promise.all(jobs);
+  const seen=new Set();
+  const all=[];
+  for(const chunk of chunks){
+    for(const item of (chunk.items||[])){
+      const key=item.slug || item._id || `${item.name}|${item.year||''}`;
+      if(!key || seen.has(key)) continue;
+      seen.add(key);
+      all.push(item);
+    }
+  }
+  const filtered=all.filter(kind==='completed' ? isSeriesCompleted : isSeriesOngoing);
+  const start=(page-1)*perPage;
+  return {
+    items:filtered.slice(start,start+perPage),
+    pagination:{
+      currentPage:page,
+      totalItems:filtered.length,
+      totalItemsPerPage:perPage,
+      totalPages:Math.max(1,Math.ceil(filtered.length/perPage))
+    }
+  };
+}
+
 app.get('/api/list/:slug',async(req,res)=>{
   try{
+    const slug=String(req.params.slug||'');
+    if(slug==='phim-bo-dang-chieu'){
+      return res.json({ok:true,...await filteredSeriesList('ongoing',req.query.page)});
+    }
+    if(slug==='phim-bo-hoan-thanh'){
+      return res.json({ok:true,...await filteredSeriesList('completed',req.query.page)});
+    }
     const q=new URLSearchParams(req.query);
-    res.json({ok:true,...normList(await jfetch(`${API}/v1/api/danh-sach/${encodeURIComponent(req.params.slug)}?${q}`))})
+    res.json({ok:true,...normList(await jfetch(`${API}/v1/api/danh-sach/${encodeURIComponent(slug)}?${q}`))})
   }catch(e){res.status(500).json({ok:false,error:e.message})}
 });
 

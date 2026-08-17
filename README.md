@@ -68,3 +68,7 @@ Dữ liệu/phim được lấy từ API nguồn. Khả năng phát phụ thuộ
 - Thêm nút hamburger ☰ trên màn hình <= 600px.
 - Menu mobile có Trang chủ, Phim chiếu rạp, Phim lẻ, Phim bộ, Thể loại, Yêu thích.
 - Thể loại trên mobile mở riêng thành grid 2 cột.
+
+
+## Fix trạng thái phim bộ
+- Phim Bộ Đang Chiếu và Phim Bộ Đã Hoàn Thành được lọc từ danh sách phim bộ theo `episode_current`.
